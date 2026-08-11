@@ -1,0 +1,16 @@
+{
+  "name": "たこ焼き屋さんゲーム 収支計算",
+  "short_name": "たこ焼き収支",
+  "description": "マネリテDAOのたこ焼き屋さんゲーム用、プレイヤーの所持金を管理する収支計算ツール。",
+  "lang": "ja",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#fff3e0",
+  "theme_color": "#e64a19",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
