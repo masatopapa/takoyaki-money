@@ -70,6 +70,11 @@
   }
   .player-head .lbl{ font-size:clamp(9px,.8vw,11px); color:#8a5a3a; font-weight:bold; }
   .player-head .val{ font-size:clamp(46px,6vw,80px); font-weight:bold; color:#bf360c; line-height:1; }
+  .debt-badge{
+    background:#efebe9; color:#8a5a3a; border-radius:999px; padding:.4em 1em;
+    font-weight:bold; font-size:clamp(11px,1.1vw,15px);
+  }
+  .debt-badge.has{ background:#7b1fa2; color:#fff; }
 
   .sec-ttl{ font-size:clamp(12px,1.1vw,15px); font-weight:bold; color:#8a5a3a; margin-bottom:.5vh; display:flex; align-items:center; gap:.4em; flex:0 0 auto; }
 
@@ -103,7 +108,7 @@
   }
   .coinbtn{
     flex:1; border-radius:9px; color:#fff; font-weight:bold; font-size:clamp(18px,2.3vw,30px);
-    box-shadow:0 4px 0 var(--sh); transition:transform .05s; min-height:9vh;
+    box-shadow:0 4px 0 var(--sh); transition:transform .05s; min-height:7vh;
   }
   .coinbtn:active{ transform:translateY(3px); box-shadow:0 1px 0 var(--sh); }
   .coinbtn.plus{ background:#2196F3; --sh:#1565a8; }
@@ -112,6 +117,26 @@
     flex:0 0 3.6em; display:flex; align-items:center; justify-content:center;
     background:#fff3e0; border-radius:8px; font-weight:bold; color:#5a3a20;
     font-size:clamp(14px,1.5vw,20px);
+  }
+
+  /* ===== 借金コーナー ===== */
+  .loan-card{ flex:0 0 auto; }
+  .loan-grid{ display:flex; gap:.8vw; align-items:stretch; }
+  .loanbtn{
+    flex:1; border-radius:9px; color:#fff; font-weight:bold; font-size:clamp(13px,1.3vw,18px);
+    line-height:1.25; box-shadow:0 4px 0 var(--sh); transition:transform .05s; min-height:6.5vh;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+  }
+  .loanbtn:active{ transform:translateY(3px); box-shadow:0 1px 0 var(--sh); }
+  .loanbtn:disabled{ opacity:.4; }
+  .loanbtn.borrow{ background:#7b1fa2; --sh:#4a0072; }
+  .loanbtn.repay{ background:#2e7d32; --sh:#1b4d1e; }
+  .loanbtn.soudan{ background:#6d4c41; --sh:#40241a; }
+  .loanbtn .icost{ display:block; font-size:.78em; opacity:.9; font-weight:normal; }
+  .loan-status{
+    flex:0 0 10em; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    background:#f3e5f5; border:2px solid #ce93d8; border-radius:8px; font-weight:bold; color:#4a0072;
+    font-size:clamp(12px,1.2vw,16px); text-align:center; line-height:1.35;
   }
 
   /* ===== スコアボード（右）===== */
@@ -124,6 +149,7 @@
   .score-card.active{ border-color:#e64a19; background:#fff3ea; }
   .score-card .sc-name{ font-size:clamp(12px,1.05vw,15px); font-weight:bold; color:#8a5a3a; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .score-card .sc-money{ font-size:clamp(14px,1.2vw,17px); font-weight:bold; color:#bf360c; }
+  .score-card .sc-debt{ font-size:clamp(11px,1vw,14px); font-weight:bold; color:#7b1fa2; margin-left:.5em; }
 
   /* ===== 履歴（右下）===== */
   .history-card{ flex:1 1 auto; min-height:0; display:flex; flex-direction:column; }
@@ -131,6 +157,28 @@
   .history-list p{ font-size:clamp(11px,.95vw,14px); padding:.4em 0; border-bottom:1px dotted #ffe0b2; }
   .history-list p:last-child{ border-bottom:none; }
   .history-empty{ color:#c2ac80; font-size:clamp(11px,1vw,14px); text-align:center; padding:1em 0; }
+
+  /* ===== 閉店結果 ===== */
+  #resultOverlay{
+    position:fixed; inset:0; background:rgba(0,0,0,.55); display:none;
+    align-items:center; justify-content:center; z-index:50; padding:2vh 2vw;
+  }
+  .result-card{
+    background:#fff; border-radius:16px; padding:3vh 3vw; box-shadow:0 6px 24px rgba(0,0,0,.25);
+    max-width:640px; width:100%; max-height:90vh; overflow-y:auto; text-align:center;
+  }
+  .result-card h2{ color:#e64a19; font-size:clamp(18px,2vw,26px); margin-bottom:.5em; }
+  .result-note{ color:#a87d55; font-size:clamp(10px,1vw,13px); margin-bottom:1em; }
+  .result-row{
+    display:flex; align-items:center; gap:.8em; flex-wrap:wrap; background:#fff3e0;
+    border-radius:10px; padding:.7em 1em; margin-bottom:.5em; text-align:left;
+  }
+  .result-row.winner{ background:#fff9c4; border:2px solid #fbc02d; }
+  .result-row .r-rank{ font-weight:bold; color:#8a5a3a; flex:0 0 3.5em; }
+  .result-row .r-name{ font-weight:bold; flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .result-row .r-money{ font-weight:bold; color:#bf360c; }
+  .result-row .r-debt{ flex-basis:100%; font-size:.85em; color:#c62828; font-weight:bold; }
+  .result-card .start-button{ margin-top:.5em; }
 </style>
 </head>
 <body>
@@ -138,6 +186,7 @@
 <header>
   <h1>🐙 たこ焼き屋さんゲーム 収支計算</h1>
   <button class="hbtn" id="undoBtn" style="display:none;">🔙 1つ戻る</button>
+  <button class="hbtn" id="closeDayBtn" style="display:none;">🏁 閉店精算</button>
   <button class="hbtn" id="resetBtn" style="display:none;">🔄 リセット</button>
 </header>
 
@@ -154,7 +203,7 @@
       <span>円</span>
     </div>
     <button class="start-button" id="startBtn">ゲーム開始</button>
-    <div class="setup-note">マネリテDAO・たこ焼き屋さんゲーム用</div>
+    <div class="setup-note">マネリテDAO・たこ焼き屋さんゲーム用（v2 借金券・閉店精算に対応）</div>
   </div>
 </div>
 
@@ -166,6 +215,7 @@
         <input class="pname" id="apName" maxlength="12">
         <span class="lbl">所持金</span>
         <span class="val" id="apMoney">¥0</span>
+        <span class="debt-badge" id="apDebt">💳 借金なし</span>
       </div>
 
       <div class="card items-card">
@@ -207,6 +257,16 @@
           </div>
         </div>
       </div>
+
+      <div class="card loan-card">
+        <div class="sec-ttl">🏦 借金券（100円借りて、返すのは110円）</div>
+        <div class="loan-grid">
+          <button class="loanbtn borrow" id="borrowBtn">借りる<span class="icost">＋100円</span></button>
+          <button class="loanbtn repay" id="repayBtn">返す<span class="icost">－110円（利息10円）</span></button>
+          <button class="loanbtn soudan" id="soudanBtn">そうだん返済<span class="icost">－100円（閉店のときだけ）</span></button>
+          <div class="loan-status" id="loanStatus">未返済 0枚／3枚</div>
+        </div>
+      </div>
     </div>
 
     <div class="side-col">
@@ -220,6 +280,15 @@
       </div>
     </div>
 
+  </div>
+</div>
+
+<div id="resultOverlay">
+  <div class="result-card">
+    <h2>🏁 閉店！ 結果発表</h2>
+    <div class="result-note">順位は、所持金から未返済の借金券（1枚110円）を引いた「実質の金額」で決まります</div>
+    <div id="resultList"></div>
+    <button class="start-button" id="resultCloseBtn">とじる</button>
   </div>
 </div>
 
@@ -246,6 +315,11 @@
     { name:'大まんぞく', cost:1000 }
   ];
 
+  var MAX_DEBT = 3;      // 未返済の借金券は1人3枚まで（ルールブック応用編①）
+  var LOAN_UNIT = 100;   // 1枚で借りられる金額
+  var LOAN_REPAY = 110;  // 1枚の返済額（利息10円）
+  var RENT = 300;        // 閉店時の鉄板レンタル料（固定費）
+
   var players = [];
   var activeIndex = 0;
   var historyStack = [];
@@ -255,13 +329,25 @@
   var scoreboardEl = document.getElementById('scoreboard');
   var apNameEl = document.getElementById('apName');
   var apMoneyEl = document.getElementById('apMoney');
+  var apDebtEl = document.getElementById('apDebt');
   var minusGridEl = document.getElementById('minusGrid');
   var plusGridEl = document.getElementById('plusGrid');
   var historyListEl = document.getElementById('historyList');
   var undoBtn = document.getElementById('undoBtn');
   var resetBtn = document.getElementById('resetBtn');
+  var closeDayBtn = document.getElementById('closeDayBtn');
+  var borrowBtn = document.getElementById('borrowBtn');
+  var repayBtn = document.getElementById('repayBtn');
+  var soudanBtn = document.getElementById('soudanBtn');
+  var loanStatusEl = document.getElementById('loanStatus');
+  var resultOverlay = document.getElementById('resultOverlay');
+  var resultListEl = document.getElementById('resultList');
 
   function yen(n){ return '¥' + Math.round(n).toLocaleString('ja-JP'); }
+
+  function pushUndo(playerIndex){
+    historyStack.push({ playerIndex: playerIndex, oldValue: players[playerIndex].money, oldDebt: players[playerIndex].debt });
+  }
 
   function buildItemButtons(container, items, sign){
     container.innerHTML = '';
@@ -277,7 +363,6 @@
 
   function changeMoney(playerIndex, amount, item){
     var p = players[playerIndex];
-    var oldMoney = p.money;
     var newMoney = p.money + amount;
     var msg;
     if(newMoney < 0 && amount < 0){
@@ -286,9 +371,34 @@
     } else {
       msg = item + 'で' + (amount>0?'+':'') + amount + '円 (残高 ' + yen(newMoney) + ')';
     }
-    historyStack.push({ playerIndex: playerIndex, oldValue: oldMoney });
+    pushUndo(playerIndex);
     p.money = newMoney;
     p.history.push(msg);
+    render();
+  }
+
+  // ===== 借金券 =====
+  function borrow(){
+    var p = players[activeIndex];
+    if(p.debt >= MAX_DEBT){ alert('未返済の借金券は' + MAX_DEBT + '枚までです。先に返してから借りましょう。'); return; }
+    pushUndo(activeIndex);
+    p.debt += 1;
+    p.money += LOAN_UNIT;
+    p.history.push('🏦 借金券で' + LOAN_UNIT + '円借りた（未返済 ' + p.debt + '枚）(残高 ' + yen(p.money) + ')');
+    render();
+  }
+
+  function repay(isSoudan){
+    var p = players[activeIndex];
+    if(p.debt === 0){ alert('未返済の借金券はありません。'); return; }
+    var cost = isSoudan ? LOAN_UNIT : LOAN_REPAY;
+    if(p.money < cost){ alert('所持金が足りません（返済には' + cost + '円必要です）。'); return; }
+    pushUndo(activeIndex);
+    p.debt -= 1;
+    p.money -= cost;
+    p.history.push(isSoudan
+      ? '🤝 そうだん返済（利息なし）で' + LOAN_UNIT + '円返した（未返済 ' + p.debt + '枚）(残高 ' + yen(p.money) + ')'
+      : '🏦 借金券を' + LOAN_REPAY + '円で返した（未返済 ' + p.debt + '枚）(残高 ' + yen(p.money) + ')');
     render();
   }
 
@@ -296,8 +406,43 @@
     if(historyStack.length === 0) return;
     var last = historyStack.pop();
     players[last.playerIndex].money = last.oldValue;
+    if(last.oldDebt !== undefined) players[last.playerIndex].debt = last.oldDebt;
     if(players[last.playerIndex].history.length > 0) players[last.playerIndex].history.pop();
     render();
+  }
+
+  // ===== 閉店精算 =====
+  function closeDay(){
+    var hasDebtor = players.some(function(p){ return p.debt > 0; });
+    var msg = '閉店しますか？\n全員からレンタル料（固定費）' + RENT + '円を引いて、結果を表示します。';
+    if(hasDebtor){
+      msg = '⚠ 未返済の借金券があるプレイヤーがいます。\n先に「返す」か「そうだん返済」で精算してから閉店するのがおすすめです。\n\n' + msg;
+    }
+    if(!confirm(msg)) return;
+    players.forEach(function(p, i){ changeMoney(i, -RENT, 'レンタル料（固定費）'); });
+    showResults();
+  }
+
+  function showResults(){
+    var list = players.map(function(p){
+      return { name: p.name, money: p.money, debt: p.debt, net: p.money - p.debt * LOAN_REPAY };
+    });
+    list.sort(function(a, b){ return b.net - a.net; });
+    var top = list.length ? list[0].net : 0;
+    resultListEl.innerHTML = '';
+    list.forEach(function(r, idx){
+      var row = document.createElement('div');
+      row.className = 'result-row' + (r.net === top ? ' winner' : '');
+      var html = '<span class="r-rank">' + (r.net === top ? '🏆 ' : '') + (idx + 1) + '位</span>'
+        + '<span class="r-name">' + escapeHtml(r.name) + '</span>'
+        + '<span class="r-money">' + yen(r.money) + '</span>';
+      if(r.debt > 0){
+        html += '<span class="r-debt">⚠ 借金券' + r.debt + '枚が未返済 → 実質 ' + yen(r.net) + '</span>';
+      }
+      row.innerHTML = html;
+      resultListEl.appendChild(row);
+    });
+    resultOverlay.style.display = 'flex';
   }
 
   function renderScoreboard(){
@@ -305,7 +450,8 @@
     players.forEach(function(p, i){
       var card = document.createElement('div');
       card.className = 'score-card' + (i===activeIndex ? ' active' : '');
-      card.innerHTML = '<span class="sc-name">' + escapeHtml(p.name) + '</span><span class="sc-money">' + yen(p.money) + '</span>';
+      var debtTag = p.debt > 0 ? '<span class="sc-debt">💳' + p.debt + '</span>' : '';
+      card.innerHTML = '<span class="sc-name">' + escapeHtml(p.name) + '</span><span class="sc-money">' + yen(p.money) + debtTag + '</span>';
       card.addEventListener('click', function(){ activeIndex = i; render(); });
       scoreboardEl.appendChild(card);
     });
@@ -315,6 +461,20 @@
     var p = players[activeIndex];
     apNameEl.value = p.name;
     apMoneyEl.textContent = yen(p.money);
+
+    if(p.debt > 0){
+      apDebtEl.className = 'debt-badge has';
+      apDebtEl.textContent = '💳 借金券 ' + p.debt + '枚（全部返すと' + (p.debt * LOAN_REPAY) + '円）';
+    } else {
+      apDebtEl.className = 'debt-badge';
+      apDebtEl.textContent = '💳 借金なし';
+    }
+
+    loanStatusEl.innerHTML = '未返済 ' + p.debt + '枚／' + MAX_DEBT + '枚' +
+      (p.debt > 0 ? '<br>全部返すと ' + (p.debt * LOAN_REPAY) + '円' : '');
+    borrowBtn.disabled = p.debt >= MAX_DEBT;
+    repayBtn.disabled = p.debt === 0;
+    soudanBtn.disabled = p.debt === 0;
 
     historyListEl.innerHTML = '';
     if(p.history.length === 0){
@@ -360,12 +520,20 @@
   });
 
   undoBtn.addEventListener('click', undoLastAction);
+  borrowBtn.addEventListener('click', borrow);
+  repayBtn.addEventListener('click', function(){ repay(false); });
+  soudanBtn.addEventListener('click', function(){ repay(true); });
+  closeDayBtn.addEventListener('click', closeDay);
+  document.getElementById('resultCloseBtn').addEventListener('click', function(){ resultOverlay.style.display = 'none'; });
+
   resetBtn.addEventListener('click', function(){
     if(!confirm('ゲームをリセットしますか？全員のデータが失われます。')) return;
     setupArea.style.display = 'flex';
     gameArea.style.display = 'none';
+    resultOverlay.style.display = 'none';
     undoBtn.style.display = 'none';
     resetBtn.style.display = 'none';
+    closeDayBtn.style.display = 'none';
     players = []; historyStack = []; activeIndex = 0;
     document.getElementById('player-count-input').value = 4;
     document.getElementById('init-money-input').value = 390;
@@ -385,13 +553,14 @@
     historyStack = [];
     activeIndex = 0;
     for(var i=0;i<count;i++){
-      players.push({ name:'プレイヤー'+(i+1), money:initMoney, history:['ゲーム開始！ 所持金'+initMoney+'円です。'] });
+      players.push({ name:'プレイヤー'+(i+1), money:initMoney, debt:0, history:['ゲーム開始！ 所持金'+initMoney+'円です。'] });
     }
 
     setupArea.style.display = 'none';
     gameArea.style.display = 'flex';
     undoBtn.style.display = 'inline-block';
     resetBtn.style.display = 'inline-block';
+    closeDayBtn.style.display = 'inline-block';
     render();
   });
 })();
