@@ -131,7 +131,6 @@
   .loanbtn:disabled{ opacity:.4; }
   .loanbtn.borrow{ background:#7b1fa2; --sh:#4a0072; }
   .loanbtn.repay{ background:#2e7d32; --sh:#1b4d1e; }
-  .loanbtn.soudan{ background:#6d4c41; --sh:#40241a; }
   .loanbtn .icost{ display:block; font-size:.78em; opacity:.9; font-weight:normal; }
   .loan-status{
     flex:0 0 10em; display:flex; flex-direction:column; align-items:center; justify-content:center;
@@ -263,7 +262,6 @@
         <div class="loan-grid">
           <button class="loanbtn borrow" id="borrowBtn">借りる<span class="icost">＋100円</span></button>
           <button class="loanbtn repay" id="repayBtn">返す<span class="icost">－110円（利息10円）</span></button>
-          <button class="loanbtn soudan" id="soudanBtn">そうだん返済<span class="icost">－100円（閉店のときだけ）</span></button>
           <div class="loan-status" id="loanStatus">未返済 0枚／3枚</div>
         </div>
       </div>
@@ -338,7 +336,6 @@
   var closeDayBtn = document.getElementById('closeDayBtn');
   var borrowBtn = document.getElementById('borrowBtn');
   var repayBtn = document.getElementById('repayBtn');
-  var soudanBtn = document.getElementById('soudanBtn');
   var loanStatusEl = document.getElementById('loanStatus');
   var resultOverlay = document.getElementById('resultOverlay');
   var resultListEl = document.getElementById('resultList');
@@ -388,17 +385,14 @@
     render();
   }
 
-  function repay(isSoudan){
+  function repay(){
     var p = players[activeIndex];
     if(p.debt === 0){ alert('未返済の借金券はありません。'); return; }
-    var cost = isSoudan ? LOAN_UNIT : LOAN_REPAY;
-    if(p.money < cost){ alert('所持金が足りません（返済には' + cost + '円必要です）。'); return; }
+    if(p.money < LOAN_REPAY){ alert('所持金が足りません（返済には' + LOAN_REPAY + '円必要です）。'); return; }
     pushUndo(activeIndex);
     p.debt -= 1;
-    p.money -= cost;
-    p.history.push(isSoudan
-      ? '🤝 そうだん返済（利息なし）で' + LOAN_UNIT + '円返した（未返済 ' + p.debt + '枚）(残高 ' + yen(p.money) + ')'
-      : '🏦 借金券を' + LOAN_REPAY + '円で返した（未返済 ' + p.debt + '枚）(残高 ' + yen(p.money) + ')');
+    p.money -= LOAN_REPAY;
+    p.history.push('🏦 借金券を' + LOAN_REPAY + '円で返した（未返済 ' + p.debt + '枚）(残高 ' + yen(p.money) + ')');
     render();
   }
 
@@ -416,7 +410,7 @@
     var hasDebtor = players.some(function(p){ return p.debt > 0; });
     var msg = '閉店しますか？\n全員からレンタル料（固定費）' + RENT + '円を引いて、結果を表示します。';
     if(hasDebtor){
-      msg = '⚠ 未返済の借金券があるプレイヤーがいます。\n先に「返す」か「そうだん返済」で精算してから閉店するのがおすすめです。\n\n' + msg;
+      msg = '⚠ 未返済の借金券があるプレイヤーがいます。\n先に「返す」で精算してから閉店するのがおすすめです。\n\n' + msg;
     }
     if(!confirm(msg)) return;
     players.forEach(function(p, i){ changeMoney(i, -RENT, 'レンタル料（固定費）'); });
@@ -474,7 +468,6 @@
       (p.debt > 0 ? '<br>全部返すと ' + (p.debt * LOAN_REPAY) + '円' : '');
     borrowBtn.disabled = p.debt >= MAX_DEBT;
     repayBtn.disabled = p.debt === 0;
-    soudanBtn.disabled = p.debt === 0;
 
     historyListEl.innerHTML = '';
     if(p.history.length === 0){
@@ -521,8 +514,7 @@
 
   undoBtn.addEventListener('click', undoLastAction);
   borrowBtn.addEventListener('click', borrow);
-  repayBtn.addEventListener('click', function(){ repay(false); });
-  soudanBtn.addEventListener('click', function(){ repay(true); });
+  repayBtn.addEventListener('click', repay);
   closeDayBtn.addEventListener('click', closeDay);
   document.getElementById('resultCloseBtn').addEventListener('click', function(){ resultOverlay.style.display = 'none'; });
 
