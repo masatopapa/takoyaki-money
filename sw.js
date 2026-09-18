@@ -1,30 +1,15 @@
-const CACHE = 'takoyaki-money-v2';
-const ASSETS = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
-
+// 2026-09-18 このサイトは https://masatopapa.github.io/takoyaki-game/ に移転した。
+// 旧版がオフラインキャッシュから復活しないよう、Service Worker は自分自身を登録解除してキャッシュを全部消す。
 self.addEventListener('install', (e) => {
-  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)).then(() => self.skipWaiting()));
+  self.skipWaiting();
 });
 
 self.addEventListener('activate', (e) => {
   e.waitUntil(
     caches.keys()
-      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
-      .then(() => self.clients.claim())
-  );
-});
-
-// ネット優先・オフライン時はキャッシュ: 起動のたびに最新版を取りに行くので再インストール不要
-self.addEventListener('fetch', (e) => {
-  if (e.request.method !== 'GET') return;
-  e.respondWith(
-    fetch(e.request)
-      .then((res) => {
-        const copy = res.clone();
-        caches.open(CACHE).then((c) => c.put(e.request, copy));
-        return res;
-      })
-      .catch(() =>
-        caches.match(e.request, { ignoreSearch: true }).then((r) => r || caches.match('./index.html'))
-      )
+      .then((keys) => Promise.all(keys.map((k) => caches.delete(k))))
+      .then(() => self.registration.unregister())
+      .then(() => self.clients.matchAll({ type: 'window' }))
+      .then((clients) => clients.forEach((c) => c.navigate(c.url)))
   );
 });

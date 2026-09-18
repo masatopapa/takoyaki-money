@@ -1,11 +1,11 @@
 {
-  "name": "たこ焼き屋さんゲーム 収支計算",
-  "short_name": "たこ焼き収支",
-  "description": "マネリテDAOのたこ焼き屋さんゲーム用、プレイヤーの所持金を管理する収支計算ツール。",
+  "name": "たこ焼き屋さんゲーム（移転しました）",
+  "short_name": "たこ焼き（旧）",
+  "description": "このページは https://masatopapa.github.io/takoyaki-game/ に移転しました。",
   "lang": "ja",
   "start_url": "./",
   "scope": "./",
-  "display": "standalone",
+  "display": "browser",
   "background_color": "#fff3e0",
   "theme_color": "#e64a19",
   "icons": [
